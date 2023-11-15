@@ -1,0 +1,23 @@
+{
+  "name": " ",
+  "version": "0.0.1",
+  "description": "",
+  "keywords": "",
+  "license": "",
+  "author": "",
+  "scripts": {
+    "build": "parcel build index.html",
+    "dev": "parcel index.html --open",
+    "start": "npm run build && npm run dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@parcel/packager-raw-url": "^2.10.2",
+    "@parcel/transformer-webmanifest": "^2.10.2",
+    "parcel-bundler": "^1.12.4"
+  },
+  "dependencies": {
+    "parcel": "^2.10.2",
+    "webpack": "^5.89.0"
+  }
+}
