@@ -1,7 +1,8 @@
 class Game {
   constructor(width, height, count) {
-    this.width = width || 40;
-    this.height = height || 40;
+    this.cellsCnt = 100;
+    this.width = width || 20;
+    this.height = height || 20;
     this.count = count || 10000;
     this.gridDom = document.querySelector('.grid');
     this.loader = document.querySelector('.loader');
@@ -12,7 +13,9 @@ class Game {
     window.canDoActiveCells = true;
     /*инпут ширины экрана*/
     document.querySelector(".set-screen-size").addEventListener("change", (event) => {
-      document.querySelector('.content').style.width = `${event.target.value}px`
+      this.cellsCnt = event.target.value
+      document.querySelector('.content').style.width = `${event.target.value * this.width}px`
+      this.startGrid()
     })
   }
 
@@ -50,7 +53,10 @@ class Game {
 
   /*создание грида*/
   startGrid = () => {
-    for (let i = 0; i < this.count; i++) {
+    this.gridDom.innerHTML = ''
+    this.cells = []
+    this.activeCells = []
+    for (let i = 0; i < this.cellsCnt * this.cellsCnt; i++) {
       const newDiv = document.createElement("div");
       newDiv.id = i;
       newDiv.className = 'cell';
@@ -75,25 +81,27 @@ class Game {
 
   /*создание рандомных клеток*/
   setRandom = () => {
-    /**/
-    this.activeCells = []
-    this._updateActiveCells();
-    /**/
-    const nums = this.cells.map(el => el.id)
-    let i = nums.length;
-    let j = 0;
-    let randomNumbers = []
+    setTimeout(() => {
+      /**/
+      this.activeCells = []
+      this._updateActiveCells();
+      /**/
+      const nums = this.cells.map(el => el.id)
+      let i = nums.length;
+      let j = 0;
+      let randomNumbers = []
 
-    while (randomNumbers.length < this.countOfRandomCells) {
-      j = Math.floor(Math.random() * (i+1));
-      randomNumbers.push(nums[j]);
-      nums.splice(j,1);
-      randomNumbers = randomNumbers.filter(el => el)
-    }
+      while (randomNumbers.length < this.countOfRandomCells) {
+        j = Math.floor(Math.random() * (i+1));
+        randomNumbers.push(nums[j]);
+        nums.splice(j,1);
+        randomNumbers = randomNumbers.filter(el => el)
+      }
 
-    // todo - не баг а фича, из this.cells не удаляются isActive
-    this.activeCells = randomNumbers.map((random) => this.cells.find(el => el.id === random))
-    this._updateActiveCells();
+      // todo - не баг а фича, из this.cells не удаляются isActive
+      this.activeCells = randomNumbers.map((random) => this.cells.find(el => el.id === random))
+      this._updateActiveCells();
+    }, 10)
   }
 
   setBigScreen = () => {
@@ -112,8 +120,12 @@ class Game {
     const date = Date.now();
     const aliveActiveCells = [];
     const willDieCells = [];
+    const willDieCellsHash = {};
     /*во всех соседях активных ячейках ищутся не активные*/
     this.activeCells.forEach((activeCell) => {
+      if (willDieCellsHash[activeCell.id]) {
+        return
+      }
       const neighbords = this._getNeigbords(activeCell.id).filter(activeCell => !activeCell.isActive)
       /* чекаем не активную ячейку на возможность создания ячейки */
       neighbords.forEach((cell) => {
@@ -122,13 +134,14 @@ class Game {
         }
         /**/
         const activeCellsNear = this._getNeigbords(cell.id).filter(activeCell => activeCell.isActive)
-        if (activeCellsNear.length > 2) {
+        if (activeCellsNear.length > 2 && activeCellsNear.length < 4) {
           willBornCells.push(cell)
           willBornCellsHash[cell.id] = true
         }
       })
       if (neighbords.length !== 6 && neighbords.length !== 5) {
         willDieCells.push(activeCell)
+        willDieCellsHash[activeCell.id] = true
       } else {
         aliveActiveCells.push(activeCell)
       }
